@@ -11,12 +11,21 @@ function generateCSRFToken() {
     return bin2hex(random_bytes(32));
 }
 
-function getRealClientIp(): string {
-    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+function extractClientIp(string $xff): ?string {
+    if ($xff === '') {
+        return null;
+    }
+    $parts = explode(',', $xff);
+    $candidate = trim($parts[0]);
+    return filter_var($candidate, FILTER_VALIDATE_IP) ? $candidate : null;
 }
 
 $loginAttemptsFile = '/var/www/data/login_attempts.json';
-$rateLimitKey = getRealClientIp();
+$forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+$clientIp = extractClientIp($forwarded_for);
+
+$isAllowed = $clientIp !== null && preg_match('/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/', $clientIp, $m) && (int)$m[1] <= 255 && (int)$m[2] <= 255 && (int)$m[3] <= 255 && (int)$m[4] <= 255;
+$rateLimitKey = $isAllowed ? $clientIp : 'unknown';
 
 $LOGIN_TEMP_LOCK_THRESHOLD = 5;
 $LOGIN_TEMP_LOCK_DURATION  = 3600;
