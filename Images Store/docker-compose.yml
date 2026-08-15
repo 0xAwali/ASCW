@@ -1,0 +1,21 @@
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./www:/usr/share/nginx/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    ports:
+      - "80:80"  
+  php:
+    build:
+      context: ./php-fpm
+      dockerfile: Dockerfile
+    command: /bin/sh -c "mkdir -p /var/www/html/uploadfiles /var/www/data && chmod 777 /var/www/html/uploadfiles /var/www/data && /bin/sh /var/www/start.sh"
+    volumes:
+      - ./start.sh:/var/www/start.sh
+      - ./www:/var/www/html
+      - ./php-fpm/www-2.conf:/usr/local/etc/php-fpm.d/www-2.conf
+    environment:
+      - Flag=ASCWG{5uCcE5sFu1ly50lvEdH2ckEd}

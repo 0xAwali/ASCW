@@ -1,0 +1,8 @@
+{
+    "name": "asc/ctf",
+    "description": "Just solve your challenge",
+    "type": "project",
+    "require": {
+        "smarty/smarty": "^5.1"
+    }
+}
